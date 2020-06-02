@@ -14,15 +14,10 @@ public class DungeonGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        DrawSquare(0, 0, 2);
+        DrawSquare(0, 0, 1);
+        GeneratePath();
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
+    
     /// <summary>
     /// Draws a square of ground tiles, with a specified size
     /// </summary>
@@ -35,6 +30,21 @@ public class DungeonGenerator : MonoBehaviour
                 Vector3Int pos = new Vector3Int(tileX, tileY, 0);
                 groundMap.SetTile(pos, ground);
             }
+        }
+    }
+
+    /// <summary>
+    /// Generates a random path of ground tiles
+    /// </summary>
+    private void GeneratePath()
+    {
+        int currentX = 0;
+        int currentY = 1;
+        
+        for (int i = 0; i < 10; i++)
+        {
+            DrawSquare(currentX, currentY, 1);
+            currentY++;
         }
     }
 }
