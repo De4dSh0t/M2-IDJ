@@ -10,8 +10,9 @@ public class RoomGenerator : MonoBehaviour
     public static Tile bottomWall;
     public static Tilemap groundMap;
     public static Tilemap wallMap;
-    public static int nEntrances = 1;
+    public static int nEntrances = 2;
     public static int entranceWidth = 3;
+    public static List<Vector3Int[]> entrancesPositions; //Saves all Vector3Int (positions) of the entrances tiles
 
     /// <summary>
     /// Generates a rectangular room, depending on the ratio and size
@@ -45,6 +46,7 @@ public class RoomGenerator : MonoBehaviour
     /// <param name="ySize"></param>
     private static void GenerateEntrance(int x, int y, int xSize, int ySize)
     {
+        entrancesPositions = new List<Vector3Int[]>(); //Saves all Vector3Int (positions) of the entrances tiles
         List<int> possibleDirections = new List<int>() {1, 2, 3, 4}; //Allows no repetition of directions when generating entrances
         int currentX = x;
         int currentY = y;
@@ -55,22 +57,26 @@ public class RoomGenerator : MonoBehaviour
             
             if (direction == 1) //Left
             {
+                Vector3Int[] positions = new Vector3Int[entranceWidth]; //Saves all tiles position of the current entrance
+                
                 if (entranceWidth == ySize - 2) //Forces the entrance to be positioned between the two pillars
                 {
                     for (int j = 0; j < entranceWidth; j++)
                     {
-                        Vector3Int pos = new Vector3Int(x - 1, ++y, 0);
+                        Vector3Int pos = new Vector3Int(currentX - 1, ++currentY, 0);
                         groundMap.SetTile(pos, ground);
+                        positions[j] = pos;
                     }
                 }
                 else if (entranceWidth < ySize - 2)
                 {
-                    int eY = Random.Range(y + entranceWidth, ySize - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
+                    int eY = Random.Range(currentY + entranceWidth, ySize - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
                     
                     for (int j = 0; j < entranceWidth; j++)
                     {
-                        Vector3Int pos = new Vector3Int(x - 1, eY++, 0);
+                        Vector3Int pos = new Vector3Int(currentX - 1, eY++, 0);
                         groundMap.SetTile(pos, ground);
+                        positions[j] = pos;
                     }
                 }
                 else
@@ -79,25 +85,30 @@ public class RoomGenerator : MonoBehaviour
                 }
 
                 possibleDirections.Remove(1);
+                entrancesPositions.Add(positions);
             }
             if (direction == 2) //Right
             {
+                Vector3Int[] positions = new Vector3Int[entranceWidth]; //Saves all tiles position of the current entrance
+                
                 if (entranceWidth == ySize - 2) //Forces the entrance to be positioned between the two pillars
                 {
                     for (int j = 0; j < entranceWidth; j++)
                     {
-                        Vector3Int pos = new Vector3Int(x + xSize, ++y, 0);
+                        Vector3Int pos = new Vector3Int(currentX + xSize, ++currentY, 0);
                         groundMap.SetTile(pos, ground);
+                        positions[j] = pos;
                     }
                 }
                 else if (entranceWidth < ySize - 2)
                 {
-                    int eY = Random.Range(y + entranceWidth, ySize - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
+                    int eY = Random.Range(currentY + entranceWidth, ySize - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
                     
                     for (int j = 0; j < entranceWidth; j++)
                     {
-                        Vector3Int pos = new Vector3Int(x + xSize, eY++, 0);
+                        Vector3Int pos = new Vector3Int(currentX + xSize, eY++, 0);
                         groundMap.SetTile(pos, ground);
+                        positions[j] = pos;
                     }
                 }
                 else
@@ -106,25 +117,30 @@ public class RoomGenerator : MonoBehaviour
                 }
                 
                 possibleDirections.Remove(2);
+                entrancesPositions.Add(positions);
             }
             if (direction == 3) //Top
             {
+                Vector3Int[] positions = new Vector3Int[entranceWidth]; //Saves all tiles position of the current entrance
+                
                 if (entranceWidth == xSize - 2) //Forces the entrance to be positioned between the two pillars
                 {
                     for (int j = 0; j < entranceWidth; j++)
                     {
-                        Vector3Int pos = new Vector3Int(++x, y + ySize, 0);
+                        Vector3Int pos = new Vector3Int(++currentX, currentY + ySize, 0);
                         groundMap.SetTile(pos, ground);
+                        positions[j] = pos;
                     }
                 }
                 else if (entranceWidth < xSize - 2)
                 {
-                    int eX = Random.Range(x + entranceWidth, xSize - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
+                    int eX = Random.Range(currentX + entranceWidth, xSize - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
                     
                     for (int j = 0; j < entranceWidth; j++)
                     {
-                        Vector3Int pos = new Vector3Int(eX++, y + ySize, 0);
+                        Vector3Int pos = new Vector3Int(eX++, currentY + ySize, 0);
                         groundMap.SetTile(pos, ground);
+                        positions[j] = pos;
                     }
                 }
                 else
@@ -133,25 +149,30 @@ public class RoomGenerator : MonoBehaviour
                 }
                 
                 possibleDirections.Remove(3);
+                entrancesPositions.Add(positions);
             }
             if (direction == 4) //Bottom
             {
+                Vector3Int[] positions = new Vector3Int[entranceWidth]; //Saves all tiles position of the current entrance
+                
                 if (entranceWidth == xSize - 2) //Forces the entrance to be positioned between the two pillars
                 {
                     for (int j = 0; j < entranceWidth; j++)
                     {
-                        Vector3Int pos = new Vector3Int(++x, y - 1, 0);
+                        Vector3Int pos = new Vector3Int(++currentX, currentY - 1, 0);
                         groundMap.SetTile(pos, ground);
+                        positions[j] = pos;
                     }
                 }
                 else if (entranceWidth < xSize - 2)
                 {
-                    int eX = Random.Range(x + entranceWidth, xSize - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
+                    int eX = Random.Range(currentX + entranceWidth, xSize - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
                     
                     for (int j = 0; j < entranceWidth; j++)
                     {
-                        Vector3Int pos = new Vector3Int(eX++, y - 1, 0);
+                        Vector3Int pos = new Vector3Int(eX++, currentY - 1, 0);
                         groundMap.SetTile(pos, ground);
+                        positions[j] = pos;
                     }
                 }
                 else
@@ -160,7 +181,11 @@ public class RoomGenerator : MonoBehaviour
                 }
                 
                 possibleDirections.Remove(4);
+                entrancesPositions.Add(positions);
             }
+
+            currentX = x;
+            currentY = y;
         }
     }
 }
