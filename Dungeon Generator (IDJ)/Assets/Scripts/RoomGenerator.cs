@@ -10,11 +10,16 @@ public class RoomGenerator : MonoBehaviour
     public static Tile bottomWall;
     public static Tilemap groundMap;
     public static Tilemap wallMap;
-    public static int nEntrances = 1; 
+    public static int nEntrances = 1;
+    public static int entranceWidth = 3;
 
     /// <summary>
     /// Generates a rectangular room, depending on the ratio and size
     /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="xSize"></param>
+    /// <param name="ySize"></param>
     public static void RectangularRoom(int x, int y, int xSize, int ySize)
     {
         //Generates floor tiles
@@ -28,33 +33,133 @@ public class RoomGenerator : MonoBehaviour
         }
         
         //Select and generate entrances
+        GenerateEntrance(x, y, xSize, ySize);
+    }
+
+    /// <summary>
+    /// Chooses tiles/positions to generate the specified number of entrances of a room
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="xSize"></param>
+    /// <param name="ySize"></param>
+    private static void GenerateEntrance(int x, int y, int xSize, int ySize)
+    {
+        List<int> possibleDirections = new List<int>() {1, 2, 3, 4}; //Allows no repetition of directions when generating entrances
+        int currentX = x;
+        int currentY = y;
+        
         for (int i = 0; i < nEntrances; i++)
         {
-            int direction = Random.Range(1, 4); //1:Left | 2:Right | 3:Top | 4:Bottom
+            int direction = possibleDirections[Random.Range(0, possibleDirections.Count)];
             
             if (direction == 1) //Left
             {
-                int eY = Random.Range(y + 1, ySize - 1);
-                Vector3Int pos = new Vector3Int(x - 1, eY, 0);
-                groundMap.SetTile(pos, ground);
+                if (entranceWidth == ySize - 2) //Forces the entrance to be positioned between the two pillars
+                {
+                    for (int j = 0; j < entranceWidth; j++)
+                    {
+                        Vector3Int pos = new Vector3Int(x - 1, ++y, 0);
+                        groundMap.SetTile(pos, ground);
+                    }
+                }
+                else if (entranceWidth < ySize - 2)
+                {
+                    int eY = Random.Range(y + entranceWidth, ySize - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
+                    
+                    for (int j = 0; j < entranceWidth; j++)
+                    {
+                        Vector3Int pos = new Vector3Int(x - 1, eY++, 0);
+                        groundMap.SetTile(pos, ground);
+                    }
+                }
+                else
+                {
+                    Debug.Log("Entrance width is greater than the distance between the pillars.");
+                }
+
+                possibleDirections.Remove(1);
             }
             if (direction == 2) //Right
             {
-                int eY = Random.Range(y + 1, ySize - 1);
-                Vector3Int pos = new Vector3Int(x + xSize, eY, 0);
-                groundMap.SetTile(pos, ground);
+                if (entranceWidth == ySize - 2) //Forces the entrance to be positioned between the two pillars
+                {
+                    for (int j = 0; j < entranceWidth; j++)
+                    {
+                        Vector3Int pos = new Vector3Int(x + xSize, ++y, 0);
+                        groundMap.SetTile(pos, ground);
+                    }
+                }
+                else if (entranceWidth < ySize - 2)
+                {
+                    int eY = Random.Range(y + entranceWidth, ySize - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
+                    
+                    for (int j = 0; j < entranceWidth; j++)
+                    {
+                        Vector3Int pos = new Vector3Int(x + xSize, eY++, 0);
+                        groundMap.SetTile(pos, ground);
+                    }
+                }
+                else
+                {
+                    Debug.Log("Entrance width is greater than the distance between the pillars.");
+                }
+                
+                possibleDirections.Remove(2);
             }
             if (direction == 3) //Top
             {
-                int eX = Random.Range(x + 1, xSize - 1);
-                Vector3Int pos = new Vector3Int(eX, y + ySize, 0);
-                groundMap.SetTile(pos, ground);
+                if (entranceWidth == xSize - 2) //Forces the entrance to be positioned between the two pillars
+                {
+                    for (int j = 0; j < entranceWidth; j++)
+                    {
+                        Vector3Int pos = new Vector3Int(++x, y + ySize, 0);
+                        groundMap.SetTile(pos, ground);
+                    }
+                }
+                else if (entranceWidth < xSize - 2)
+                {
+                    int eX = Random.Range(x + entranceWidth, xSize - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
+                    
+                    for (int j = 0; j < entranceWidth; j++)
+                    {
+                        Vector3Int pos = new Vector3Int(eX++, y + ySize, 0);
+                        groundMap.SetTile(pos, ground);
+                    }
+                }
+                else
+                {
+                    Debug.Log("Entrance width is greater than the distance between the pillars.");
+                }
+                
+                possibleDirections.Remove(3);
             }
             if (direction == 4) //Bottom
             {
-                int eX = Random.Range(x + 1, xSize - 1);
-                Vector3Int pos = new Vector3Int(eX, y - 1, 0);
-                groundMap.SetTile(pos, ground);
+                if (entranceWidth == xSize - 2) //Forces the entrance to be positioned between the two pillars
+                {
+                    for (int j = 0; j < entranceWidth; j++)
+                    {
+                        Vector3Int pos = new Vector3Int(++x, y - 1, 0);
+                        groundMap.SetTile(pos, ground);
+                    }
+                }
+                else if (entranceWidth < xSize - 2)
+                {
+                    int eX = Random.Range(x + entranceWidth, xSize - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
+                    
+                    for (int j = 0; j < entranceWidth; j++)
+                    {
+                        Vector3Int pos = new Vector3Int(eX++, y - 1, 0);
+                        groundMap.SetTile(pos, ground);
+                    }
+                }
+                else
+                {
+                    Debug.Log("Entrance width is greater than the distance between the pillars.");
+                }
+                
+                possibleDirections.Remove(4);
             }
         }
     }
