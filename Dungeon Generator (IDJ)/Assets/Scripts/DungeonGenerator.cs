@@ -10,41 +10,23 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private Tile bottomWall;
     [SerializeField] private Tilemap groundMap;
     [SerializeField] private Tilemap wallMap;
-
+    
     // Start is called before the first frame update
     void Start()
     {
-        DrawSquare(0, 0, 1);
-        GeneratePath();
-    }
-    
-    /// <summary>
-    /// Draws a square of ground tiles, with a specified size
-    /// </summary>
-    private void DrawSquare(int x, int y, int size)
-    {
-        for (int tileX = x; tileX < x + size; tileX++)
-        {
-            for (int tileY = y; tileY < y + size; tileY++)
-            {
-                Vector3Int pos = new Vector3Int(tileX, tileY, 0);
-                groundMap.SetTile(pos, ground);
-            }
-        }
+        GenerateRooms();
     }
 
     /// <summary>
-    /// Generates a random path of ground tiles
+    /// Generates the number of predefined rooms
     /// </summary>
-    private void GeneratePath()
+    private void GenerateRooms()
     {
-        int currentX = 0;
-        int currentY = 1;
-        
-        for (int i = 0; i < 10; i++)
-        {
-            DrawSquare(currentX, currentY, 1);
-            currentY++;
-        }
+        RoomGenerator.ground = ground;
+        RoomGenerator.topWall = topWall;
+        RoomGenerator.bottomWall = bottomWall;
+        RoomGenerator.groundMap = groundMap;
+        RoomGenerator.wallMap = wallMap;
+        RoomGenerator.RectangularRoom(0, 0, 10, 5);
     }
 }
