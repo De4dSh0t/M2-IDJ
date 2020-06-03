@@ -27,6 +27,6 @@ public class DungeonGenerator : MonoBehaviour
         RoomGenerator.bottomWall = bottomWall;
         RoomGenerator.groundMap = groundMap;
         RoomGenerator.wallMap = wallMap;
-        RoomGenerator.RectangularRoom(0, 0, 10, 5);
+        RoomGenerator.RectangularRoom(0, 0, 5, 5);
     }
 }

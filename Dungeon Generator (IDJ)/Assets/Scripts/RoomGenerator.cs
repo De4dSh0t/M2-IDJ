@@ -41,13 +41,13 @@ public class RoomGenerator : MonoBehaviour
             if (direction == 2) //Right
             {
                 int eY = Random.Range(y + 1, ySize - 1);
-                Vector3Int pos = new Vector3Int(xSize, eY, 0);
+                Vector3Int pos = new Vector3Int(x + xSize, eY, 0);
                 groundMap.SetTile(pos, ground);
             }
             if (direction == 3) //Top
             {
                 int eX = Random.Range(x + 1, xSize - 1);
-                Vector3Int pos = new Vector3Int(eX, ySize, 0);
+                Vector3Int pos = new Vector3Int(eX, y + ySize, 0);
                 groundMap.SetTile(pos, ground);
             }
             if (direction == 4) //Bottom
