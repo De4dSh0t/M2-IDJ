@@ -273,6 +273,15 @@ MonoBehaviour:
   bottomWall: {fileID: 11400000, guid: 04bca46a084dc2c4ab01fe75f1383c39, type: 2}
   groundMap: {fileID: 164044169}
   wallMap: {fileID: 884279530}
+  roomInfo:
+  - x: 0
+    y: 0
+    xSize: 5
+    ySize: 5
+  - x: 6
+    y: 6
+    xSize: 10
+    ySize: 10
 --- !u!156049354 &286073060
 Grid:
   m_ObjectHideFlags: 0
