@@ -12,7 +12,6 @@ public class RoomGenerator : MonoBehaviour
     public static Tile bottomWall;
     public static Tilemap groundMap;
     public static Tilemap wallMap;
-    public static int nEntrances = 2;
     public static int entranceWidth = 3;
     public static List<Vector3Int[]> entrancesPositions; //Saves all Vector3Int (positions) of the entrances tiles
 
@@ -23,7 +22,7 @@ public class RoomGenerator : MonoBehaviour
     /// <param name="y"></param>
     /// <param name="xSize"></param>
     /// <param name="ySize"></param>
-    public static void RectangularRoom(int x, int y, int xSize, int ySize)
+    public static void RectangularRoom(int x, int y, int xSize, int ySize, int nEntrances)
     {
         //Generates floor tiles
         for (int tileX = x; tileX < x + xSize; tileX++)
@@ -36,7 +35,7 @@ public class RoomGenerator : MonoBehaviour
         }
         
         //Select and generate entrances
-        GenerateEntrance(x, y, xSize, ySize);
+        GenerateEntrance(x, y, xSize, ySize, nEntrances);
     }
 
     /// <summary>
@@ -46,13 +45,13 @@ public class RoomGenerator : MonoBehaviour
     /// <param name="y"></param>
     /// <param name="xSize"></param>
     /// <param name="ySize"></param>
-    private static void GenerateEntrance(int x, int y, int xSize, int ySize)
+    private static void GenerateEntrance(int x, int y, int xSize, int ySize, int nEntrances)
     {
         entrancesPositions = new List<Vector3Int[]>(); //Saves all Vector3Int (positions) of the entrances tiles
         List<int> possibleDirections = new List<int>() {1, 2, 3, 4}; //Allows no repetition of directions when generating entrances
         int currentX = x;
         int currentY = y;
-        
+
         for (int i = 0; i < nEntrances; i++)
         {
             int direction = possibleDirections[Random.Range(0, possibleDirections.Count)];
@@ -72,7 +71,7 @@ public class RoomGenerator : MonoBehaviour
                 }
                 else if (entranceWidth < ySize - 2)
                 {
-                    int eY = Random.Range(currentY + entranceWidth, ySize - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
+                    int eY = Random.Range(currentY + entranceWidth, (ySize + currentY) - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
                     
                     for (int j = 0; j < entranceWidth; j++)
                     {
@@ -104,7 +103,7 @@ public class RoomGenerator : MonoBehaviour
                 }
                 else if (entranceWidth < ySize - 2)
                 {
-                    int eY = Random.Range(currentY + entranceWidth, ySize - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
+                    int eY = Random.Range(currentY + entranceWidth, (ySize + currentY) - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
                     
                     for (int j = 0; j < entranceWidth; j++)
                     {
@@ -136,7 +135,7 @@ public class RoomGenerator : MonoBehaviour
                 }
                 else if (entranceWidth < xSize - 2)
                 {
-                    int eX = Random.Range(currentX + entranceWidth, xSize - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
+                    int eX = Random.Range(currentX + entranceWidth, (xSize + currentX) - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
                     
                     for (int j = 0; j < entranceWidth; j++)
                     {
@@ -168,7 +167,7 @@ public class RoomGenerator : MonoBehaviour
                 }
                 else if (entranceWidth < xSize - 2)
                 {
-                    int eX = Random.Range(currentX + entranceWidth, xSize - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
+                    int eX = Random.Range(currentX + entranceWidth, (xSize + currentX) - entranceWidth); //Chooses the nº of "entranceWidth" blocks to use as a entrance (avoids "pillars")
                     
                     for (int j = 0; j < entranceWidth; j++)
                     {

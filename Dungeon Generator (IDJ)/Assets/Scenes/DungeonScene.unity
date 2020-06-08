@@ -274,14 +274,18 @@ MonoBehaviour:
   groundMap: {fileID: 164044169}
   wallMap: {fileID: 884279530}
   roomInfo:
-  - x: 0
+  - name: Room 1
+    x: 0
     y: 0
     xSize: 5
     ySize: 5
-  - x: 6
+    nEntrances: 4
+  - name: Room 2
+    x: 6
     y: 6
     xSize: 10
     ySize: 10
+    nEntrances: 2
 --- !u!156049354 &286073060
 Grid:
   m_ObjectHideFlags: 0

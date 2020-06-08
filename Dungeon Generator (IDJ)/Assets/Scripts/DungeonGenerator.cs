@@ -17,20 +17,20 @@ public class DungeonGenerator : MonoBehaviour
     {
         foreach (var room in roomInfo)
         {
-            GenerateRoom(room.x, room.y, room.xSize, room.ySize);
+            GenerateRoom(room.x, room.y, room.xSize, room.ySize, room.nEntrances);
         }
     }
 
     /// <summary>
     /// Defines the tiles to be used and Generates the room
     /// </summary>
-    private void GenerateRoom(int x, int y, int xSize, int ySize)
+    private void GenerateRoom(int x, int y, int xSize, int ySize, int nEntrances)
     {
         RoomGenerator.ground = ground;
         RoomGenerator.topWall = topWall;
         RoomGenerator.bottomWall = bottomWall;
         RoomGenerator.groundMap = groundMap;
         RoomGenerator.wallMap = wallMap;
-        RoomGenerator.RectangularRoom(x, y, xSize, ySize);
+        RoomGenerator.RectangularRoom(x, y, xSize, ySize, nEntrances);
     }
 }

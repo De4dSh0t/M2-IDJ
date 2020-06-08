@@ -9,8 +9,10 @@ using UnityEngine;
 [Serializable]
 public class RoomInfo
 {
+    public string name;
     public int x;
     public int y;
     public int xSize;
     public int ySize;
+    [Range(1, 4)] public int nEntrances;
 }
