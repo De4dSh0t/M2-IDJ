@@ -14,6 +14,7 @@ public class Room
     public Tilemap wallMap;
     public int entranceWidth = 3;
     public Dictionary<int, int[]> entrancePosition; //Dictionary(direction, int[] {xEntrance, yEntrance}). Saves entrance direction and first tile position
+    public List<int> possibleDirections = new List<int>() {1, 2, 3, 4}; //Allows no repetition of directions when generating entrances
 
     /// <summary>
     /// Generates a rectangular room, depending on the ratio and size
@@ -48,7 +49,6 @@ public class Room
     private void GenerateEntrance(int x, int y, int xSize, int ySize, int nEntrances)
     {
         entrancePosition = new Dictionary<int, int[]>();
-        List<int> possibleDirections = new List<int>() {1, 2, 3, 4}; //Allows no repetition of directions when generating entrances
         int currentX = x;
         int currentY = y;
 

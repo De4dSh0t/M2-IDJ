@@ -280,36 +280,6 @@ MonoBehaviour:
     xSize: 5
     ySize: 5
     nEntrances: 4
-  - name: Room 2
-    x: -25
-    y: 0
-    xSize: 15
-    ySize: 10
-    nEntrances: 2
-  - name: Room 3
-    x: -20
-    y: -20
-    xSize: 20
-    ySize: 10
-    nEntrances: 1
-  - name: Room 4
-    x: 10
-    y: 15
-    xSize: 40
-    ySize: 10
-    nEntrances: 3
-  - name: Room 5
-    x: 15
-    y: 30
-    xSize: 10
-    ySize: 10
-    nEntrances: 2
-  - name: Room 6
-    x: 0
-    y: 30
-    xSize: 5
-    ySize: 5
-    nEntrances: 1
 --- !u!156049354 &286073060
 Grid:
   m_ObjectHideFlags: 0
