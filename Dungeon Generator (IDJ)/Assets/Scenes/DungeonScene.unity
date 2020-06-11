@@ -273,6 +273,10 @@ MonoBehaviour:
   bottomWall: {fileID: 11400000, guid: 04bca46a084dc2c4ab01fe75f1383c39, type: 2}
   groundMap: {fileID: 164044169}
   wallMap: {fileID: 884279530}
+  maxNumPaths: 20
+  maxRoomXSize: 10
+  maxRoomYSize: 10
+  entranceWidth: 3
   roomInfo:
   - name: Room 1
     x: 0

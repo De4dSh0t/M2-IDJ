@@ -12,12 +12,22 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private Tilemap groundMap;
     [SerializeField] private Tilemap wallMap;
     [SerializeField] private int maxNumPaths;
+    [SerializeField] private int maxRoomXSize;
+    [SerializeField] private int maxRoomYSize;
+    [SerializeField] private int entranceWidth;
     [SerializeField] private RoomInfo[] roomInfo;
     private int removePossibleEntrance; //This will prevent the entrances from being repeated on the same side.
+    private int minRoomXSize;
+    private int minRoomYSize;
 
     // Start is called before the first frame update
     void Start()
     {
+        //To avoid entrances overlaping room pillars
+        minRoomXSize = entranceWidth + 2;
+        minRoomYSize = entranceWidth + 2;
+        
+        //Recursively generates the rooms
         GenerateRoom(0, 0, 5, 5, 2);
     }
 
@@ -34,6 +44,7 @@ public class DungeonGenerator : MonoBehaviour
             groundMap = groundMap,
             wallMap = wallMap
         };
+        room.entranceWidth = entranceWidth;
         room.possibleDirections.Remove(removePossibleEntrance); 
         room.RectangularRoom(x, y, xSize, ySize, nEntrances);
         GeneratePath(room, room.entranceWidth, 20);
@@ -50,6 +61,8 @@ public class DungeonGenerator : MonoBehaviour
         int xEntrance = 0;
         int yEntrance = 0;
         int direction = 0;
+        int xSize = 0;
+        int ySize = 0;
         
         foreach (var entrances in room.entrancePosition)
         {
@@ -57,6 +70,8 @@ public class DungeonGenerator : MonoBehaviour
             xEntrance = entrances.Value[0];
             yEntrance = entrances.Value[1];
             int nEntrances = Random.Range(0, 4);
+            xSize = Random.Range(minRoomXSize, maxRoomXSize);
+            ySize = Random.Range(minRoomYSize, maxRoomYSize);
             
             if (direction == 1) //Left
             {
@@ -72,7 +87,7 @@ public class DungeonGenerator : MonoBehaviour
                 if (maxNumPaths > 0)
                 {
                     removePossibleEntrance = 2; //Because corridor comes from the right side of the next room
-                    GenerateRoom(xEntrance - pathLength, yEntrance, 10, 10, nEntrances);
+                    GenerateRoom(xEntrance - pathLength, yEntrance - 1, xSize, ySize, nEntrances);
                 }
             }
 
@@ -90,7 +105,7 @@ public class DungeonGenerator : MonoBehaviour
                 if (maxNumPaths > 0)
                 {
                     removePossibleEntrance = 1; //Because corridor comes from the left side of the next room
-                    GenerateRoom(xEntrance + pathLength, yEntrance, 10, 10, nEntrances);
+                    GenerateRoom(xEntrance + pathLength, yEntrance - 1, xSize, ySize, nEntrances);
                 }
             }
 
@@ -108,7 +123,7 @@ public class DungeonGenerator : MonoBehaviour
                 if (maxNumPaths > 0)
                 {
                     removePossibleEntrance = 4; //Because corridor comes from the bottom of the next room
-                    GenerateRoom(xEntrance, yEntrance + pathLength, 10, 10, nEntrances);
+                    GenerateRoom(xEntrance - 1, yEntrance + pathLength, xSize, ySize, nEntrances);
                 }
             }
 
@@ -126,7 +141,7 @@ public class DungeonGenerator : MonoBehaviour
                 if (maxNumPaths > 0)
                 {
                     removePossibleEntrance = 3; //Because corridor comes from the top of the next room
-                    GenerateRoom(xEntrance, yEntrance - pathLength, 10, 10, nEntrances);
+                    GenerateRoom(xEntrance - 1, yEntrance - pathLength, xSize, ySize, nEntrances);
                 }
             }
             
