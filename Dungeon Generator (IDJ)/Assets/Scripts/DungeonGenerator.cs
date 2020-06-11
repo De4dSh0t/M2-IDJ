@@ -48,6 +48,7 @@ public class DungeonGenerator : MonoBehaviour
         room.entranceWidth = entranceWidth;
         room.possibleDirections.Remove(removePossibleEntrance); 
         room.RectangularRoom(x, y, xSize, ySize, nEntrances);
+        
         GeneratePath(room, room.entranceWidth, pathLength);
     }
 
@@ -92,6 +93,8 @@ public class DungeonGenerator : MonoBehaviour
             int nEntrances = 0;
             int tileX = xEntrance;
             int tileY = yEntrance;
+            int checkTileX; //Secondary variable used to store the next tile position (in order to check if the cell next to it is in use)
+            int checkTileY;
             bool first = true; //Used when direction is 2 (right) and 3 (up), because the first tile should be a block ahead
             xSize = Random.Range(minRoomXSize, maxRoomXSize);
             ySize = Random.Range(minRoomYSize, maxRoomYSize);
@@ -99,22 +102,33 @@ public class DungeonGenerator : MonoBehaviour
 
             //Chooses the number of entrances of the next room (using probability)
             float random = Random.value;
-            if (random <= .2f)
+            if (random <= .15f)
             {
                 nEntrances = 0;
             }
-            else if(random > .2f)
+            else if(random > .15f)
             {
                 nEntrances = Random.Range(1, 4);
             }
 
             for (int i = 0; i < pathLength; i++)
             {
+                List<int> tryDirection = new List<int>() {1, 2, 3, 4}; //Used to try another direction when a cell is in use
+                
                 switch (direction)
                 {
                     case 1: //Left
                     {
                         possibleTurnDirection = new List<int>() {1, 3, 4};
+                        checkTileX = tileX;
+                        checkTileY = tileY;
+
+                        if (groundMap.HasTile(new Vector3Int(checkTileX - 1, checkTileY, 0)) || 
+                            groundMap.HasTile(new Vector3Int(checkTileX - 1, checkTileY + 1, 0))) //Check if the next cell (on the left side) has a tile
+                        {
+                            tryDirection.Remove(1);
+                            goto default;
+                        }
 
                         tileX -= entranceWidth;
                         CorridorSquare(tileX, tileY);
@@ -127,12 +141,32 @@ public class DungeonGenerator : MonoBehaviour
 
                         if (first)
                         {
+                            checkTileX = tileX + 1;
+                            checkTileY = tileY;
+                            
+                            if (groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY, 0)) ||
+                                groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY + 1, 0))) //Check if the next cell (on the right side) has a tile
+                            {
+                                tryDirection.Remove(2);
+                                goto default;
+                            }
+                            
                             tileX += 1;
                             CorridorSquare(tileX, tileY);
                             first = false;
                         }
                         else
                         {
+                            checkTileX = tileX + entranceWidth;
+                            checkTileY = tileY;
+                            
+                            if (groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY, 0)) ||
+                                groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY + 1, 0))) //Check if the next cell (on the right side) has a tile
+                            {
+                                tryDirection.Remove(2);
+                                goto default;
+                            }
+                            
                             tileX += entranceWidth;
                             CorridorSquare(tileX, tileY);
                         }
@@ -145,12 +179,32 @@ public class DungeonGenerator : MonoBehaviour
 
                         if (first)
                         {
+                            checkTileX = tileX;
+                            checkTileY = tileY + 1;
+                            
+                            if (groundMap.HasTile(new Vector3Int(checkTileX, checkTileY + 1, 0)) ||
+                                groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY + 1, 0))) //Check if the next cell (on the top) has a tile
+                            {
+                                tryDirection.Remove(3);
+                                goto default;
+                            }
+                            
                             tileY += 1;
                             CorridorSquare(tileX, tileY);
                             first = false;
                         }
                         else
                         {
+                            checkTileX = tileX - entranceWidth;
+                            checkTileY = tileY;
+                            
+                            if (groundMap.HasTile(new Vector3Int(checkTileX, checkTileY + 1, 0)) ||
+                                groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY + 1, 0))) //Check if the next cell (on the top) has a tile
+                            {
+                                tryDirection.Remove(3);
+                                goto default;
+                            }
+                            
                             tileY += entranceWidth;
                             CorridorSquare(tileX, tileY);
                         }
@@ -160,22 +214,42 @@ public class DungeonGenerator : MonoBehaviour
                     case 4: //Down
                     {
                         possibleTurnDirection = new List<int>() {1, 2, 4};
+                        checkTileX = tileX;
+                        checkTileY = tileY - entranceWidth;
 
+                        if (groundMap.HasTile(new Vector3Int(checkTileX, checkTileY - 1, 0)) ||
+                            groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY - 1, 0))) //Check if the next cell (on the top) has a tile
+                        {
+                            tryDirection.Remove(4);
+                            goto default;
+                        }
+                        
                         tileY -= entranceWidth;
                         CorridorSquare(tileX, tileY);
                         
                         break;
                     }
+                    default: //Try another direction (when a cell is in use)
+                    {
+                        foreach (var index in tryDirection)
+                        {
+                            if (index == 1) goto case 1;
+                            if (index == 2) goto case 2;
+                            if (index == 3) goto case 3;
+                            if (index == 4) goto case 4;
+                        }
+                        break;
+                    }
                 }
 
-                //  deviationRate -= deviationRate / pathLength;
-                //
-                //  if (deviationRate <= 0)
-                //  {
-                //      direction = possibleTurnDirection[Random.Range(0, possibleTurnDirection.Count)];
-                //  }
-                //
-                // direction = possibleTurnDirection[Random.Range(0, possibleTurnDirection.Count)];
+                 // deviationRate -= deviationRate / pathLength;
+                 //
+                 // if (deviationRate <= 0)
+                 // {
+                 //     direction = possibleTurnDirection[Random.Range(0, possibleTurnDirection.Count)];
+                 // }
+                 //
+                 // direction = possibleTurnDirection[Random.Range(0, possibleTurnDirection.Count)];
             }
 
             if (maxNumPaths <= 0)
