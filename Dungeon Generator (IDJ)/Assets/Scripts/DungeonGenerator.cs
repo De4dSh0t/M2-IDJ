@@ -82,23 +82,30 @@ public class DungeonGenerator : MonoBehaviour
         int xSize = 0;
         int ySize = 0;
         List<int> possibleTurnDirection = new List<int>();
-        int iPathLength = pathLength; //Controls how many iterations can be done
-        
+        bool lastRoom = false;
+
         foreach (var entrances in room.entrancePosition)
         {
             direction = entrances.Key; //Entrance Direction
-            xEntrance = entrances.Value[0];
-            yEntrance = entrances.Value[1];
-            int nEntrances = Random.Range(1, 4);
+            xEntrance = entrances.Value[0]; //First Entrance Tile: x position
+            yEntrance = entrances.Value[1]; //First Entrance Tile: y position
+            int nEntrances = 0;
             int tileX = xEntrance;
             int tileY = yEntrance;
             bool first = true; //Used when direction is 2 (right) and 3 (up), because the first tile should be a block ahead
             xSize = Random.Range(minRoomXSize, maxRoomXSize);
             ySize = Random.Range(minRoomYSize, maxRoomYSize);
-            
-            if (maxNumPaths <= 0)
+            int deviationRate = corridorDeviationRate;
+
+            //Chooses the number of entrances of the next room (using probability)
+            float random = Random.value;
+            if (random <= .2f)
             {
                 nEntrances = 0;
+            }
+            else if(random > .2f)
+            {
+                nEntrances = Random.Range(1, 4);
             }
 
             for (int i = 0; i < pathLength; i++)
@@ -160,13 +167,50 @@ public class DungeonGenerator : MonoBehaviour
                         break;
                     }
                 }
-                
-                direction = possibleTurnDirection[Random.Range(0, possibleTurnDirection.Count)];
 
-                if (i == pathLength - 1 && maxNumPaths > 0) //Last iteration
+                //  deviationRate -= deviationRate / pathLength;
+                //
+                //  if (deviationRate <= 0)
+                //  {
+                //      direction = possibleTurnDirection[Random.Range(0, possibleTurnDirection.Count)];
+                //  }
+                //
+                // direction = possibleTurnDirection[Random.Range(0, possibleTurnDirection.Count)];
+            }
+
+            if (maxNumPaths <= 0)
+            {
+                nEntrances = 0;
+                lastRoom = true;
+            }
+            
+            if (maxNumPaths > 0) //Last iteration
+            {
+                if(direction == 1)
                 {
-                    GenerateRoom(tileX - xSize, tileY - ySize, xSize, ySize, nEntrances);
+                    removePossibleEntrance = 2; //Because corridor comes from the right side of the next room
+                    GenerateRoom(tileX - xSize, Random.Range(tileY - ySize + entranceWidth + 1, tileY - 1), xSize, ySize, nEntrances);
                 }
+                if(direction == 2) 
+                {
+                    removePossibleEntrance = 1; //Because corridor comes from the left side of the next room
+                    GenerateRoom(tileX, Random.Range(tileY - ySize + entranceWidth + 1, tileY - entranceWidth), xSize, ySize, nEntrances);
+                }
+                if (direction == 3)
+                {
+                    removePossibleEntrance = 4; //Because corridor comes from the bottom of the next room
+                    GenerateRoom(Random.Range(tileX - xSize + entranceWidth + 1, tileX - 1), tileY, xSize, ySize, nEntrances);
+                }
+                if(direction == 4) 
+                {
+                    removePossibleEntrance = 3; //Because corridor comes from the top of the next room
+                    GenerateRoom(Random.Range(tileX - xSize + entranceWidth + 1, tileX - 1), tileY - ySize, xSize, ySize, nEntrances);
+                }
+            }
+            
+            if (lastRoom)
+            {
+                break;
             }
 
             maxNumPaths--;
