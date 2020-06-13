@@ -11,12 +11,14 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private Tile bottomWall;
     [SerializeField] private Tilemap groundMap;
     [SerializeField] private Tilemap wallMap;
-    [SerializeField] private int maxNumPaths;
+    [SerializeField] private int maxRoomGenerations; //Limits the number of generations of the Room generator. When it reaches the max, rooms will be generated with zero entrances
     [SerializeField] private int maxRoomXSize;
     [SerializeField] private int maxRoomYSize;
     [SerializeField] private int entranceWidth;
-    [SerializeField] private int pathLength;
-    [SerializeField] private int corridorDeviationRate; //Controls how much the corridor deviates
+    [SerializeField] private int minPathLength;
+    [SerializeField] private int maxPathLength;
+    [SerializeField] private bool corridorDeviation;
+    [SerializeField] private int corridorDeviationRate; //Controls how much the corridor deviates (in percentage)
     private int removePossibleEntrance; //This will prevent the entrances from being repeated on the same side.
     private int minRoomXSize;
     private int minRoomYSize;
@@ -29,7 +31,10 @@ public class DungeonGenerator : MonoBehaviour
         minRoomYSize = entranceWidth + 2;
         
         //Recursively generates the rooms
-        GenerateRoom(0, 0, 5, 5, 2);
+        GenerateRoom(0, 0, Random.Range(entranceWidth + 2, maxRoomXSize), Random.Range(entranceWidth + 2, maxRoomYSize), Random.Range(1, 5));
+        
+        //Generates the walls for all the empty cells next to the "groundMap" boundaries
+        GenerateWalls();
     }
 
     /// <summary>
@@ -37,18 +42,20 @@ public class DungeonGenerator : MonoBehaviour
     /// </summary>
     private void GenerateRoom(int x, int y, int xSize, int ySize, int nEntrances)
     {
+        //Initializes a new room
         Room room = new Room
         {
             ground = ground,
-            topWall = topWall,
-            bottomWall = bottomWall,
-            groundMap = groundMap,
-            wallMap = wallMap
+            groundMap = groundMap
         };
         room.entranceWidth = entranceWidth;
-        room.possibleDirections.Remove(removePossibleEntrance); 
-        room.RectangularRoom(x, y, xSize, ySize, nEntrances);
+        room.possibleDirections.Remove(removePossibleEntrance); //This will prevent the next room to generate an entrance on the same side as the corridor
         
+        //Generates the room (rectangular room)
+        room.RectangularRoom(x, y, xSize, ySize, nEntrances);
+
+        //Generates the path (for every entrance that this room has)
+        int pathLength = Random.Range(minPathLength, maxPathLength);
         GeneratePath(room, room.entranceWidth, pathLength);
     }
 
@@ -77,43 +84,41 @@ public class DungeonGenerator : MonoBehaviour
     /// <param name="pathLength"></param>
     private void GeneratePath(Room room, int entranceWidth, int pathLength)
     {
-        int xEntrance = 0;
-        int yEntrance = 0;
-        int direction = 0;
-        int xSize = 0;
-        int ySize = 0;
         List<int> possibleTurnDirection = new List<int>();
-        bool lastRoom = false;
 
         foreach (var entrances in room.entrancePosition)
         {
-            direction = entrances.Key; //Entrance Direction
-            xEntrance = entrances.Value[0]; //First Entrance Tile: x position
-            yEntrance = entrances.Value[1]; //First Entrance Tile: y position
-            int nEntrances = 0;
+            int direction = entrances.Key; //Direction of the entrance
+            int xEntrance = entrances.Value[0]; //First Entrance Tile (x)
+            int yEntrance = entrances.Value[1]; //First Entrance Tile (y)
+            int nEntrances = 0; //Number of entrances of the next room
             int tileX = xEntrance;
             int tileY = yEntrance;
-            int checkTileX; //Secondary variable used to store the next tile position (in order to check if the cell next to it is in use)
-            int checkTileY;
+            int xSize = Random.Range(minRoomXSize, maxRoomXSize);
+            int ySize = Random.Range(minRoomYSize, maxRoomYSize);
+            int deviationRate = pathLength * (corridorDeviationRate / 100);
             bool first = true; //Used when direction is 2 (right) and 3 (up), because the first tile should be a block ahead
-            xSize = Random.Range(minRoomXSize, maxRoomXSize);
-            ySize = Random.Range(minRoomYSize, maxRoomYSize);
-            int deviationRate = corridorDeviationRate;
 
             //Chooses the number of entrances of the next room (using probability)
             float random = Random.value;
-            if (random <= .15f)
+            if (random <= 0.15f)
             {
                 nEntrances = 0;
             }
-            else if(random > .15f)
+            else if(random > 0.15f)
             {
                 nEntrances = Random.Range(1, 4);
             }
 
+            //Generates the corridor/path (by spawning x number of "CorridorSquares()")
             for (int i = 0; i < pathLength; i++)
             {
-                List<int> tryDirection = new List<int>() {1, 2, 3, 4}; //Used to try another direction when a cell is in use
+                //Used to try another direction when a cell is in use
+                List<int> tryDirection = new List<int>() {1, 2, 3, 4}; 
+                
+                //Secondary variable used to store the next tile position (in order to check if the cell next to it is in use)
+                int checkTileX; 
+                int checkTileY;
                 
                 switch (direction)
                 {
@@ -123,8 +128,8 @@ public class DungeonGenerator : MonoBehaviour
                         checkTileX = tileX;
                         checkTileY = tileY;
 
-                        if (groundMap.HasTile(new Vector3Int(checkTileX - 1, checkTileY, 0)) || 
-                            groundMap.HasTile(new Vector3Int(checkTileX - 1, checkTileY + 1, 0))) //Check if the next cell (on the left side) has a tile
+                        if (groundMap.HasTile(new Vector3Int(checkTileX - entranceWidth, checkTileY, 0)) || 
+                            groundMap.HasTile(new Vector3Int(checkTileX - entranceWidth, checkTileY + 1, 0))) //Check if the next cell (on the left side) has a tile
                         {
                             tryDirection.Remove(1);
                             goto default;
@@ -144,8 +149,8 @@ public class DungeonGenerator : MonoBehaviour
                             checkTileX = tileX + 1;
                             checkTileY = tileY;
                             
-                            if (groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY, 0)) ||
-                                groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY + 1, 0))) //Check if the next cell (on the right side) has a tile
+                            if (groundMap.HasTile(new Vector3Int(checkTileX + entranceWidth, checkTileY, 0)) ||
+                                groundMap.HasTile(new Vector3Int(checkTileX + entranceWidth, checkTileY + 1, 0))) //Check if the next cell (on the right side) has a tile
                             {
                                 tryDirection.Remove(2);
                                 goto default;
@@ -160,8 +165,8 @@ public class DungeonGenerator : MonoBehaviour
                             checkTileX = tileX + entranceWidth;
                             checkTileY = tileY;
                             
-                            if (groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY, 0)) ||
-                                groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY + 1, 0))) //Check if the next cell (on the right side) has a tile
+                            if (groundMap.HasTile(new Vector3Int(checkTileX + entranceWidth, checkTileY, 0)) ||
+                                groundMap.HasTile(new Vector3Int(checkTileX + entranceWidth, checkTileY + 1, 0))) //Check if the next cell (on the right side) has a tile
                             {
                                 tryDirection.Remove(2);
                                 goto default;
@@ -182,8 +187,8 @@ public class DungeonGenerator : MonoBehaviour
                             checkTileX = tileX;
                             checkTileY = tileY + 1;
                             
-                            if (groundMap.HasTile(new Vector3Int(checkTileX, checkTileY + 1, 0)) ||
-                                groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY + 1, 0))) //Check if the next cell (on the top) has a tile
+                            if (groundMap.HasTile(new Vector3Int(checkTileX, checkTileY + entranceWidth, 0)) ||
+                                groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY + entranceWidth, 0))) //Check if the next cell (on the top) has a tile
                             {
                                 tryDirection.Remove(3);
                                 goto default;
@@ -198,8 +203,8 @@ public class DungeonGenerator : MonoBehaviour
                             checkTileX = tileX - entranceWidth;
                             checkTileY = tileY;
                             
-                            if (groundMap.HasTile(new Vector3Int(checkTileX, checkTileY + 1, 0)) ||
-                                groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY + 1, 0))) //Check if the next cell (on the top) has a tile
+                            if (groundMap.HasTile(new Vector3Int(checkTileX, checkTileY + entranceWidth, 0)) ||
+                                groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY + entranceWidth, 0))) //Check if the next cell (on the top) has a tile
                             {
                                 tryDirection.Remove(3);
                                 goto default;
@@ -217,8 +222,8 @@ public class DungeonGenerator : MonoBehaviour
                         checkTileX = tileX;
                         checkTileY = tileY - entranceWidth;
 
-                        if (groundMap.HasTile(new Vector3Int(checkTileX, checkTileY - 1, 0)) ||
-                            groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY - 1, 0))) //Check if the next cell (on the top) has a tile
+                        if (groundMap.HasTile(new Vector3Int(checkTileX, checkTileY - entranceWidth, 0)) ||
+                            groundMap.HasTile(new Vector3Int(checkTileX + 1, checkTileY - entranceWidth, 0))) //Check if the next cell (on the top) has a tile
                         {
                             tryDirection.Remove(4);
                             goto default;
@@ -241,53 +246,71 @@ public class DungeonGenerator : MonoBehaviour
                         break;
                     }
                 }
-
-                 // deviationRate -= deviationRate / pathLength;
-                 //
-                 // if (deviationRate <= 0)
-                 // {
-                 //     direction = possibleTurnDirection[Random.Range(0, possibleTurnDirection.Count)];
-                 // }
-                 //
-                 // direction = possibleTurnDirection[Random.Range(0, possibleTurnDirection.Count)];
+                
+                if (corridorDeviation && deviationRate == 0)
+                {
+                     direction = possibleTurnDirection[Random.Range(0, possibleTurnDirection.Count)];
+                     deviationRate += deviationRate;
+                }
             }
 
-            if (maxNumPaths <= 0)
+            if (maxRoomGenerations <= 0)
             {
                 nEntrances = 0;
-                lastRoom = true;
-            }
-            
-            if (maxNumPaths > 0) //Last iteration
-            {
-                if(direction == 1)
-                {
-                    removePossibleEntrance = 2; //Because corridor comes from the right side of the next room
-                    GenerateRoom(tileX - xSize, Random.Range(tileY - ySize + entranceWidth + 1, tileY - 1), xSize, ySize, nEntrances);
-                }
-                if(direction == 2) 
-                {
-                    removePossibleEntrance = 1; //Because corridor comes from the left side of the next room
-                    GenerateRoom(tileX, Random.Range(tileY - ySize + entranceWidth + 1, tileY - entranceWidth), xSize, ySize, nEntrances);
-                }
-                if (direction == 3)
-                {
-                    removePossibleEntrance = 4; //Because corridor comes from the bottom of the next room
-                    GenerateRoom(Random.Range(tileX - xSize + entranceWidth + 1, tileX - 1), tileY, xSize, ySize, nEntrances);
-                }
-                if(direction == 4) 
-                {
-                    removePossibleEntrance = 3; //Because corridor comes from the top of the next room
-                    GenerateRoom(Random.Range(tileX - xSize + entranceWidth + 1, tileX - 1), tileY - ySize, xSize, ySize, nEntrances);
-                }
-            }
-            
-            if (lastRoom)
-            {
-                break;
             }
 
-            maxNumPaths--;
+            if(direction == 1)
+            {
+                removePossibleEntrance = 2; //Because corridor comes from the right side of the next room
+                GenerateRoom(tileX - xSize, Random.Range(tileY - ySize + entranceWidth + 1, tileY - 1), xSize, ySize, nEntrances);
+            }
+            if(direction == 2) 
+            {
+                removePossibleEntrance = 1; //Because corridor comes from the left side of the next room
+                GenerateRoom(tileX, Random.Range(tileY - ySize + entranceWidth + 1, tileY - entranceWidth), xSize, ySize, nEntrances);
+            }
+            if (direction == 3)
+            {
+                removePossibleEntrance = 4; //Because corridor comes from the bottom of the next room
+                GenerateRoom(Random.Range(tileX - xSize + entranceWidth + 1, tileX - 1), tileY, xSize, ySize, nEntrances);
+            }
+            if(direction == 4) 
+            {
+                removePossibleEntrance = 3; //Because corridor comes from the top of the next room
+                GenerateRoom(Random.Range(tileX - xSize + entranceWidth + 1, tileX - 1), tileY - ySize, xSize, ySize, nEntrances);
+            }
+
+            maxRoomGenerations--;
+        }
+    }
+    
+    /// <summary>
+    /// Generates the walls, taking into account the "groundMap" boundaries
+    /// </summary>
+    private void GenerateWalls()
+    {
+        BoundsInt bounds = groundMap.cellBounds; //Saves the boundaries of a the "groundMap" tilemap
+        
+        for (int xMap = bounds.xMin - 1; xMap < bounds.xMax + 1; xMap++)
+        {
+            for (int yMap = bounds.yMin - 1; yMap < bounds.yMax + 1; yMap++)
+            {
+                Vector3Int currentPos = new Vector3Int(xMap, yMap, 0); //Vector3Int of the current position
+                Vector3Int topPosition = new Vector3Int(xMap, yMap - 1, 0); //Vector3Int of the top position
+                Vector3Int bottomPosition = new Vector3Int(xMap, yMap + 1, 0); //Vector3Int of the bottom position
+
+                if (!groundMap.HasTile(currentPos)) //Checks if the cell ("tile") at the "currentPos" is empty (null)
+                {
+                    if (groundMap.HasTile(topPosition)) //Checks if the cell below is used (to spawn the "topWall" tile)
+                    {
+                        wallMap.SetTile(currentPos, topWall);
+                    }
+                    else if (groundMap.HasTile(bottomPosition)) //Checks if the cell above is used (to spawn the "bottomWall" tile)
+                    {
+                        wallMap.SetTile(currentPos, bottomWall);
+                    }
+                }
+            }
         }
     }
 }
