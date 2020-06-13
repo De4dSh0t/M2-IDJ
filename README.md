@@ -23,7 +23,6 @@ E assim vai, de forma recursiva, gerando as várias salas e os respetivos corred
 
 ## Problemas conhecidos
 - Apesar dos corredores não ficarem uns em cima dos outros, o mesmo não acontece com as salas. Isto porque o algoritmo só deteta se, nos corredores, pode ser gerado outro quadrado ou não. Ele acaba por gerar a sala no fim do corredor. **Tentei resolver este problema, mas acabava por causar ainda mais problemas sérios ao gerador (a ponto de o *Unity* crashar)**
-- Os corredores têm lógica para mudar de direção dependendo de uma percetagem definida pelo utilizador. Porém, como as salas acabam por ser geradas independentemente da existência de uma célula em uso ou não, o mapa torna-se numa confusão. Uma solução imperfeita é aumentar o tamanho máximo dos corredores e aumentar a percentagem de quando o corredor deve mudar de direção.
 
 # Pré-produção
 ## Ideias
