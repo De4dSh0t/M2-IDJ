@@ -280,7 +280,7 @@ MonoBehaviour:
   minPathLength: 3
   maxPathLength: 10
   corridorDeviation: 0
-  corridorDeviationRate: 10
+  corridorDeviationRate: 80
 --- !u!156049354 &286073060
 Grid:
   m_ObjectHideFlags: 0

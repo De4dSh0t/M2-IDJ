@@ -18,7 +18,7 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private int minPathLength;
     [SerializeField] private int maxPathLength;
     [SerializeField] private bool corridorDeviation;
-    [SerializeField] private int corridorDeviationRate; //Controls how much the corridor deviates (in percentage)
+    [SerializeField] private int corridorDeviationRate; //Controls at what percentage of the corridor it deviates. The higher the number, the less it deviates.
     private int removePossibleEntrance; //This will prevent the entrances from being repeated on the same side.
     private int minRoomXSize;
     private int minRoomYSize;
@@ -96,7 +96,7 @@ public class DungeonGenerator : MonoBehaviour
             int tileY = yEntrance;
             int xSize = Random.Range(minRoomXSize, maxRoomXSize);
             int ySize = Random.Range(minRoomYSize, maxRoomYSize);
-            int deviationRate = pathLength * (corridorDeviationRate / 100);
+            int deviationRate = pathLength * (corridorDeviationRate / 100); //Defines when to deviate
             bool first = true; //Used when direction is 2 (right) and 3 (up), because the first tile should be a block ahead
 
             //Chooses the number of entrances of the next room (using probability)
@@ -247,7 +247,7 @@ public class DungeonGenerator : MonoBehaviour
                     }
                 }
                 
-                if (corridorDeviation && deviationRate == 0)
+                if (corridorDeviation && deviationRate == i)
                 {
                      direction = possibleTurnDirection[Random.Range(0, possibleTurnDirection.Count)];
                      deviationRate += deviationRate;
